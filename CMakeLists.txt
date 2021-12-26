@@ -46,9 +46,11 @@ else ()
     add_compile_options(-O0 -g)
 endif ()
 
+include_directories(Modbus/mbsource/ascii Modbus/mbsource/functions Modbus/mbsource/include Modbus/mbsource/rtu )
+include_directories(Modbus/mbsource/tcp Modbus/mbsource/ Modbus/mbport Modbus/mbapp)
 include_directories(Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include C:/etl/include Drivers ../../ATEAM/welding/)
 
-add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F411xE -DLOW_POWER)
+add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F411xE -DUSE_FULL_LL_DRIVER -DLOW_POWER)
 
 set(COMMON_DIR ../../ATEAM/welding/common)
 
@@ -61,7 +63,7 @@ set(COMMON_SOURCES
         ${COMMON_DIR}/byte_converter.cpp
         ${COMMON_DIR}/abort.cpp)
 
-file(GLOB_RECURSE SOURCES "Startup/*.*" "Src/*.*" "Drivers/*.*" ${COMMON_SOURCES} Drivers)
+file(GLOB_RECURSE SOURCES "Startup/*.*" "Src/*.*" "Drivers/*.*" ${COMMON_SOURCES} Drivers "Modbus/*.*")
 
 set_source_files_properties(Src/main.c Src/stm32f4xx_it Src/c_to_cpp.c PROPERTIES LANGUAGE CXX)
 
