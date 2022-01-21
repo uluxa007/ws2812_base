@@ -1,7 +1,6 @@
 #include <AddressableLedStrip.h>
 #include "initialize.h"
 
-extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim5;
 
@@ -37,7 +36,6 @@ namespace System
     {
         SystemCoreClockUpdate();
         __HAL_TIM_SET_AUTORELOAD(&htim2,SystemCoreClock/800000 - 1);
-        HAL_TIM_Encoder_Start_IT(&htim1, TIM_CHANNEL_ALL);
         HAL_TIM_Base_Start_IT(&htim5);
     }
 }
