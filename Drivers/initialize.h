@@ -2,7 +2,7 @@
 #define WS2812_BASE_INITIALIZE_H
 
 #include "main.h"
-#include <common/virtual_timer.h>
+#include <virtual_timer.h>
 
 constexpr uint32_t DELAY_LEN = 48;
 constexpr uint32_t HIGH = 72;

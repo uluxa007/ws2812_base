@@ -46,24 +46,13 @@ else ()
     add_compile_options(-O0 -g)
 endif ()
 
-include_directories(Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include C:/etl/include Drivers ../../ATEAM/welding/)
+include_directories(Inc Drivers/STM32F4xx_HAL_Driver/Inc Drivers/STM32F4xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F4xx/Include Drivers/CMSIS/Include C:/etl/include Drivers)
 
 add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F411xE -DLOW_POWER)
 
-set(COMMON_DIR ../../ATEAM/welding/common)
-
-set(COMMON_SOURCES
-        ${COMMON_DIR}/stream/legacy/packet_write_stream.cpp
-        ${COMMON_DIR}/stream/legacy/packet_read_stream.cpp
-        ${COMMON_DIR}/legacy/version_struct.cpp
-        ${COMMON_DIR}/checksum.cpp
-        ${COMMON_DIR}/version.cpp
-        ${COMMON_DIR}/byte_converter.cpp
-        ${COMMON_DIR}/abort.cpp)
-
 file(GLOB_RECURSE SOURCES "Startup/*.*" "Src/*.*" "Drivers/*.*" ${COMMON_SOURCES} Drivers)
 
-set_source_files_properties(Src/main.c Src/stm32f4xx_it Src/c_to_cpp.c PROPERTIES LANGUAGE CXX)
+set_source_files_properties(Src/main.c Src/stm32f4xx_it PROPERTIES LANGUAGE CXX)
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F411CEUX_FLASH.ld)
 

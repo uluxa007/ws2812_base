@@ -3,7 +3,6 @@
 
 #include "main.h"
 #include "initialize.h"
-#include "common/virtual_timer.h"
 
 struct RBGColor
 {

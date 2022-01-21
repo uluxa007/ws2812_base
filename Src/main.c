@@ -26,14 +26,6 @@
 #include "periphery.h"
 #include <array>
 #include "AddressableLedStrip.h"
-extern "C"
-{
-#include "ws2812.h"
-#include "ssd1306.h"
-#include "menu.h"
-#include "settings.h"
-}
-#include "garl.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -126,15 +118,9 @@ int main(void)
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
-
-    System::Init();
-
-    ssd1306_Init(hi2c1,0x78);
-    Garl_init();
-    menu_init();
-
     srand(0);
 
+    System::Init();
     static auto& led_update_timer = System::GetTimerFactory().CreateFineTimer(20);
     static AddressableLedStrip ledStrip(led_update_timer);
     System::SetAddressableLedStrip(&ledStrip);
@@ -146,14 +132,17 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      System::GetTimerFactory().NotifySubscribers();
+    System::GetTimerFactory().NotifySubscribers();
+
+      System::GetAddressableLedStrip()->SetPixelColor(rand()%255,0,0,0);
+      System::GetAddressableLedStrip()->SetPixelColor(0,rand()%255,0,1);
+      System::GetAddressableLedStrip()->SetPixelColor(0,0,rand()%255,2);
+      System::GetAddressableLedStrip()->SetPixelColor(rand()%128,rand()%128,0,3);
+      System::GetAddressableLedStrip()->SetPixelColor(0,rand()%128,rand()%128,4);
+      HAL_Delay(200);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      menuHandler();
-      Garl_Handler();
-      //System::GetAddressableLedStrip()->SetIntervalColor({0,0,0},0,300);
-
   }
   /* USER CODE END 3 */
 }
