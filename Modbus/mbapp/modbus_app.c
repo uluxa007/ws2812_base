@@ -5,7 +5,7 @@
 #define MB_COILS_COUNT                      6
 #define MB_DISCRETE_INPUTS_COUNT            4
 #define MB_ANALOG_IN_COUNT                  2
-#define MB_HOLDING_COUNT                    4
+#define MB_HOLDING_COUNT                    14
 
 #define MB_COILS_BUFFER_LENGTH              ((MB_COILS_COUNT+7)/8)
 #define MB_DISCRETE_IN_BUFFER_LENGTH        ((MB_DISCRETE_INPUTS_COUNT+7)/8)
@@ -48,8 +48,8 @@ eMBErrorCode MbInit(eMBMode eMode, UCHAR ucSlaveAddress)
     LL_USART_EnableIT_RXNE(USART2);
 
     SystemCoreClockUpdate();
-    uint64_t baudrate = 115200;
-    eMBInit( MB_RTU, ucSlaveAddress, 0x00,baudrate,mb_parity );
+    //uint64_t baudrate = LL_USART_GetBaudRate(USART2,SystemCoreClock, LL_USART_GetOverSampling(USART2));
+    eMBInit( MB_RTU, ucSlaveAddress, 0x00,115200,mb_parity );
     eMBEnable( );
 }
 

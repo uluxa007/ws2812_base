@@ -10,6 +10,7 @@
 	******************************************************************************
   */
 #include "menu.h"
+#include "modbus_app.h"
 
 
 void page1_Draw(void);
@@ -42,7 +43,7 @@ static char parameters_names[PAGE_COUNT][LINE_COUNT][13]=
 uint16_t max_value[PAGE_COUNT][LINE_COUNT]=
 {
 	{8,							22,						254,					254},
-	{254,						254,					254,					0},
+	{360  ,						254,					254,					0},
 	{254,						254,					254,					0},
 	{100,						100,					100,					0},
 	{100,						100,					100,					0},
@@ -134,6 +135,11 @@ uint8_t x_name_3 = 113;		///< String 3 x offset.
 
 SSD1306_COLOR font_color=White;	///< Font color
 
+bool ModBusEnabled()
+{
+    return MbGetCoils(0,1);
+}
+
 /**
   * @brief Function to display Splash screen
   * @param[in] splash_screen Splash screen buffer.
@@ -197,7 +203,7 @@ void menu_init()
 	time_irq = 0;
 	hold_time =0;
 	//Splash
-	//splashScreen();
+	splashScreen();
 }
 
 /**
@@ -237,16 +243,19 @@ void menuDrawHandler()
 {
 	ssd1306_Fill(Black);
 	//CURSOR
-	for(int8_t j=0;j<6;j++)
-		for(uint8_t i=5-j;i<123+j;i++)
-			ssd1306_DrawPixel(i,1+j+12*Settings.parameters.current_line,White);
-	for(int8_t j=0;j<6;j++)
-		for(uint8_t i=j;i<128-j;i++)
-			ssd1306_DrawPixel(i,7+j+12*Settings.parameters.current_line,White);
+	if(!ModBusEnabled())
+	{
+        for (int8_t j = 0; j < 6; j++)
+            for (uint8_t i = 5 - j; i < 123 + j; i++)
+                ssd1306_DrawPixel(i, 1 + j + 12 * Settings.parameters.current_line, White);
+        for (int8_t j = 0; j < 6; j++)
+            for (uint8_t i = j; i < 128 - j; i++)
+                ssd1306_DrawPixel(i, 7 + j + 12 * Settings.parameters.current_line, White);
+    }
 	//
 	for(uint8_t i=0;i<LINE_COUNT;i++)
 	{
-		if(i==Settings.parameters.current_line)
+		if(i == Settings.parameters.current_line && !ModBusEnabled())
 			font_color = Black;
 		else
 			font_color = White;
@@ -294,7 +303,7 @@ void menuDrawHandler()
 	}
 	
 	//PAGE
-	if(Settings.parameters.current_line==LINE_5)
+	if(Settings.parameters.current_line == LINE_5  && !ModBusEnabled())
 			font_color = Black;
 		else
 			font_color = White;
@@ -313,16 +322,16 @@ void menuDrawHandler()
 		//HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
 	}
 	
-	if(HAL_GetTick()-last_changes_time>5000&&HAL_GetTick()-last_changes_time<5100)
-	{
-		ssd1306_SetContrast(200);
-		showSplashScreen(splash_screen_1);
-	}
-	else if(HAL_GetTick()-last_changes_time>10000&&HAL_GetTick()-last_changes_time<10100)
-	{
-		ssd1306_SetContrast(1);
-		showSplashScreen(splash_screen_1);
-	}
+//	if(HAL_GetTick()-last_changes_time>5000&&HAL_GetTick()-last_changes_time<5100)
+//	{
+//		ssd1306_SetContrast(200);
+//		showSplashScreen(splash_screen_1);
+//	}
+//	else if(HAL_GetTick()-last_changes_time>10000&&HAL_GetTick()-last_changes_time<10100)
+//	{
+//		ssd1306_SetContrast(1);
+//		showSplashScreen(splash_screen_1);
+//	}
 }
 
 /**
@@ -356,6 +365,50 @@ void menuInputHandler()
 		}
 	}
 }
+
+/**
+  * @brief Modbus registers handler
+  * @param None
+	* @date 23.03.2021
+  * @retval None
+  */
+void modBusHandler()
+{
+    if(ModBusEnabled())
+    {
+//        static uint16_t prev_values[PAGE_COUNT][LINE_COUNT];
+        //First menu page
+        Settings.values[PAGE_1][0] = MbGetHoldingRegisters(0) * 2;
+        Settings.values[PAGE_1][1] = MbGetHoldingRegisters(1) * 2;
+        Settings.values[PAGE_1][2] = MbGetHoldingRegisters(2) * 2;
+        Settings.values[PAGE_1][3] = MbGetHoldingRegisters(3) * 2;
+        //Second menu page
+        Settings.values[PAGE_2][0] = MbGetHoldingRegisters(4) * 2;
+        Settings.values[PAGE_2][1] = MbGetHoldingRegisters(5) * 2;
+        Settings.values[PAGE_2][2] = MbGetHoldingRegisters(6) * 2;
+        //Third menu page
+        Settings.values[PAGE_3][0] = MbGetHoldingRegisters(7) * 2;
+        Settings.values[PAGE_3][1] = MbGetHoldingRegisters(8) * 2;
+        Settings.values[PAGE_3][2] = MbGetHoldingRegisters(9) * 2;
+        //Sixth menu page
+        Settings.values[PAGE_6][0] = MbGetHoldingRegisters(10) * 2;
+        //Current page/line
+        Settings.parameters.current_page = MbGetHoldingRegisters(11);
+        Settings.parameters.current_line = MbGetHoldingRegisters(12);
+
+//        if(memcmp(Settings.values,prev_values,sizeof(prev_values)) != 0)
+//        {
+//            val_changed = true;
+//            memcpy(prev_values,Settings.values,sizeof(prev_values));
+//        }
+        if(MbGetCoils(1,1))
+        {
+            val_changed = true;
+            MbSetCoils(0,1,1);
+        }
+    }
+}
+
 /**
   * @brief Menu handler
   * @param None
@@ -364,7 +417,10 @@ void menuInputHandler()
   */
 void menuHandler()
 {
-	menuInputHandler();
+    if(ModBusEnabled())
+        modBusHandler();
+    else
+	    menuInputHandler();
 	menuDrawHandler();
 	buttonHandler();
 }
@@ -456,7 +512,7 @@ void buttonHandler()
   */
 void page1_Draw()
 {
-		if(Settings.parameters.current_line==LINE_1)
+		if(Settings.parameters.current_line == LINE_1  && !ModBusEnabled())
 			font_color = Black;
 		else
 			font_color = White;
@@ -486,7 +542,7 @@ void page1_Draw()
 		}
 	}
 	
-	if(Settings.parameters.current_line==LINE_2)
+	if(Settings.parameters.current_line == LINE_2 && !ModBusEnabled())
 		font_color = Black;
 	else
 		font_color = White;
