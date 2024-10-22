@@ -16,4 +16,9 @@ namespace Periphery
     }
 }
 
+namespace Periphery::AddressableLedStrip
+{
+    void Update(void* data, size_t len);
+    void Reset();
+}
 #endif //WS2812_BASE_PERIPHERY_H

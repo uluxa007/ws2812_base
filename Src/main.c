@@ -66,7 +66,8 @@ static void MX_TIM5_Init(void);
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 {
-    HAL_TIM_PWM_Stop_DMA(&htim2,TIM_CHANNEL_2);
+//    HAL_TIM_PWM_Stop_DMA(&htim2,TIM_CHANNEL_2);
+    Periphery::AddressableLedStrip::Reset();
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
@@ -114,9 +115,15 @@ int main(void)
     srand(0);
 
     System::Init();
-    static auto& led_update_timer = System::GetTimerFactory().CreateFineTimer(20);
-    static AddressableLedStrip ledStrip(led_update_timer);
-    System::SetAddressableLedStrip(&ledStrip);
+    auto& led_update_timer = System::GetTimerFactory().CreateFineTimer(20);
+    LedStrip led_strip(
+            led_update_timer,
+            [](uint32_t* data, uint16_t len)
+            {
+                Periphery::AddressableLedStrip::Update(data, len);
+            }
+    );
+    led_strip.SetLedOnMask(0xFF);
 
 
   /* USER CODE END 2 */
@@ -127,11 +134,7 @@ int main(void)
   {
     System::GetTimerFactory().NotifySubscribers();
 
-      System::GetAddressableLedStrip()->SetPixelColor(rand()%255,0,0,0);
-      System::GetAddressableLedStrip()->SetPixelColor(0,rand()%255,0,1);
-      System::GetAddressableLedStrip()->SetPixelColor(0,0,rand()%255,2);
-      System::GetAddressableLedStrip()->SetPixelColor(rand()%128,rand()%128,0,3);
-      System::GetAddressableLedStrip()->SetPixelColor(0,rand()%128,rand()%128,4);
+      led_strip.SetIntervalColor(RGBColor{static_cast<uint8_t>(rand()%255),0,0}, 0, 10);
       HAL_Delay(200);
     /* USER CODE END WHILE */
 

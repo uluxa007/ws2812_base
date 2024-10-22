@@ -1,5 +1,5 @@
-#ifndef COMMON_VIRTUAL_TIMER_H_
-#define COMMON_VIRTUAL_TIMER_H_
+#ifndef LED_STRIP_TIMER_H_
+#define LED_STRIP_TIMER_H_
 
 
 #include <atomic>
@@ -51,9 +51,6 @@ namespace Common
         
         virtual IVirtualTimer& CreateTimer(size_t msec = 0) = 0;
 
-        // Creates timer, which triggers subscriber's callback inside Decrement method
-        // It highly increases a timer accuracy, but you should create such a timer
-        // for super fast methods only!
         virtual IVirtualTimer& CreateFineTimer(size_t msec = 0) = 0;
         
         virtual void Decrement(size_t msec) = 0;
